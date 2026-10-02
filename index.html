@@ -189,7 +189,7 @@ body.typing main{padding-bottom:40vh}
 <div id="sheet"><div class="sh" id="sh"></div></div>
 <div id="toast"></div>
 <div id="ptr">당겨서 새로고침</div>
-<input type="file" id="picker" accept="image/*" capture="environment" hidden>
+<input type="file" id="picker" accept="image/*" hidden>
 
 <script>
 const SP0 = {
@@ -280,7 +280,7 @@ const QS = [
   ["q9","라운지 다과는 누가, 언제 채우나요?"],
   ["q10","내 식사 시간과 장소는?"]
 ];
-const APPV="16";
+const APPV="17";
 const COLLS=["speakers","sessions","rooms","people","roomphotos","qa"];
 
 let store={speakers:{},sessions:{},rooms:{},people:{},roomphotos:{},qa:{}};
@@ -435,12 +435,12 @@ function viewQA(){
 function openSpeaker(id){
   sheetFn=()=>{
     const s=SP[id],d=spd(id),ss=SESS.filter(x=>x.sp.includes(id)),off=offset();
-    $("#sh").innerHTML=`<div class="grab"></div><div class="top"><button class="big" data-pick="speaker|${id}">${d.photo?`<img src="${esc(d.photo)}" alt="${esc(s[0])}">`:"사진<br>찍기"}</button>
+    $("#sh").innerHTML=`<div class="grab"></div><div class="top"><button class="big" data-pick="speaker|${id}">${d.photo?`<img src="${esc(d.photo)}" alt="${esc(s[0])}">`:"사진<br>넣기"}</button>
       <div><div class="nm">${esc(s[0])}</div><div class="en">${esc(s[1])}</div><div class="org">${esc(s[3])}, ${esc(s[2])}</div></div></div>
       <ul>${ss.map(x=>{const isX=x.id.startsWith("x-"),f=isX?`speakers|${id}|time`:`sessions|${x.id}|sT`,moved=!isX&&x.o&&x.o!==x.s;
         return `<li><div>${esc(x.type)} ${esc(x.title)}</div><div class="row" style="margin-top:6px"><input class="in-t" type="time" data-f="${f}" data-tv="${x.s}" style="max-width:150px"><span class="sub" style="font-size:13px">콜 ${fmt(toM(x.s)-off)}${moved?`<br>원래 ${x.o}`:""}</span></div></li>`}).join("")}</ul>
       ${ss.some(x=>!x.id.startsWith("x-"))?`<p class="note" style="margin:6px 0 0">시간을 바꾸면 같은 세션 연사 모두 바뀌어. 시간 선택기에서 '재설정'을 누르면 ${inBase(id)?"원래 시간으로":"시간 미정으로"} 돌아가.</p>`:""}
-      <div class="acts"><button class="tg${d.arrived?" on":""}" data-tg="speakers|${id}|arrived">${d.arrived?"라운지 도착함":"라운지 도착 체크"}</button>${d.photo?`<button class="tg" data-pick="speaker|${id}">사진 다시 찍기</button>`:""}</div>
+      <div class="acts"><button class="tg${d.arrived?" on":""}" data-tg="speakers|${id}|arrived">${d.arrived?"라운지 도착함":"라운지 도착 체크"}</button>${d.photo?`<button class="tg" data-pick="speaker|${id}">사진 바꾸기</button>`:""}</div>
       ${inBase(id)?"":`${ss.length?`<div class="row" style="margin-top:8px"><button class="btn ghost" data-set="speakers|${id}|time|">시간 지우기 (시간 미정으로)</button></div>`:`<label class="f">무대 시간 (확인되면 입력)</label><input class="in-t" type="time" data-f="speakers|${id}|time" data-tv=""><p class="note" style="margin:6px 0 0">아젠다에 없는 연사야. 시간을 넣으면 콜 순서에 들어가.</p>`}`}
       <label class="f">동행인, 연락처</label><input class="in-t" data-f="speakers|${id}|contact" value="${esc(d.contact)}" placeholder="비서, 통역, 전화번호">
       <label class="f">메모</label><textarea class="in-t" data-f="speakers|${id}|memo" placeholder="옷차림, 요청사항 등">${esc(d.memo)}</textarea>
