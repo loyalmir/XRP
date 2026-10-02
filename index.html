@@ -186,7 +186,7 @@ textarea.in-t{min-height:64px;resize:vertical}
 <input type="file" id="picker" accept="image/*" capture="environment" hidden>
 
 <script>
-const SP = {
+const SP0 = {
   "crypto-eri":["에리 이시야마","Crypto Eri","공동창업자","오나미 프레스"],
   "asheesh-birla":["아시시 비를라","Asheesh Birla","창업자 겸 대표","에버노스"],
   "hugo-philion":["휴고 필리온","Hugo Philion","공동창업자","플레어"],
@@ -229,9 +229,14 @@ const SP = {
   "pablo-che-leo":["파블로 체 레오","Pablo Che Leo","그로스 총괄","리프"],
   "lacey-wisdom":["레이시 위즈덤","Lacey Wisdom","제너럴 파트너","PL캐피탈"],
   "leo-lee":["이한길","Leo Lee","팀장","카카오뱅크"],
-  "fig":["피그","Fig","공동창업자","스퀴드"]
+  "fig":["피그","Fig","공동창업자","스퀴드"],
+  "markus-infanger":["마커스 인펜저","Markus Infanger","RippleX 수석부사장","리플"],
+  "rox-park":["록스 박","Rox Park","기관사업 총괄","도플러 파이낸스"],
+  "min-lin":["민 린","Min Lin","글로벌 사업개발 총괄 전무","온도 파이낸스"],
+  "dcent":["디센트 연사","DCENT","이름 미확인","디센트"]
 };
-const SESS = [
+let SP={},SESS=[];
+const BASE = [
   ["s3","12:05","12:35","패널","XRP 활용과 자산 토큰화 전망",["crypto-eri","asheesh-birla","hugo-philion","nicholas-motz","connor-sullivan"]],
   ["s4","12:35","12:55","대담","XRPL 기반 AI 에이전트 경제, 어디까지 왔나",["christina-chan","chandler-fang"]],
   ["s5","12:55","13:15","대담","리플의 기관 금융 전략과 XRP",["christina-chan","monica-long"]],
@@ -269,7 +274,7 @@ const QS = [
   ["q9","라운지 다과는 누가, 언제 채우나요?"],
   ["q10","내 식사 시간과 장소는?"]
 ];
-const APPV="9";
+const APPV="10";
 const COLLS=["speakers","sessions","rooms","people","roomphotos","qa"];
 
 let store={speakers:{},sessions:{},rooms:{},people:{},roomphotos:{},qa:{}};
@@ -293,6 +298,15 @@ const cst=(sid,spid)=>((sst(sid).sp||{})[spid])||0;
 const isCalled=s=>s.sp.every(id=>cst(s.id,id)>=1);
 const spd=id=>store.speakers[id]||{};
 const firstSess=id=>SESS.find(s=>s.sp.includes(id));
+const inBase=id=>BASE.some(s=>s.sp.includes(id));
+const okTime=t=>/^\d{1,2}:\d{2}/.test(t||"");
+function rebuild(){
+  SP=Object.assign({},SP0);
+  for(const[id,d]of Object.entries(store.speakers))if(d&&d.custom&&d.ko)SP[id]=[d.ko,d.en||"",d.title||"",d.org||""];
+  const extra=Object.keys(SP).filter(id=>!inBase(id)&&okTime(spd(id).time)).map(id=>{const t=spd(id).time.slice(0,5);return{id:"x-"+id,s:t,e:fmt(toM(t)+15),type:"추가",title:(SP[id][3]?SP[id][3]+" ":"")+"(아젠다 외)",sp:[id]}});
+  SESS=BASE.concat(extra).sort((a,b)=>toM(a.s)-toM(b.s));
+}
+const untimed=()=>Object.keys(SP).filter(id=>!firstSess(id));
 const avatar=(img,name)=>img?`<span class="av"><img src="${esc(img)}" alt=""></span>`:`<span class="av">${esc((name||"?").slice(0,1))}</span>`;
 
 function flash(t){const el=$("#toast");el.textContent=t;el.style.display="block";clearTimeout(flash.t);flash.t=setTimeout(()=>el.style.display="none",2600)}
@@ -318,10 +332,10 @@ function schedule(){
 }
 document.addEventListener("focusout",()=>{if(pendingRender){pendingRender=false;setTimeout(()=>schedule(),50)}});
 
-function renderAll(){renderHero();renderView();if(sheetFn)sheetFn()}
+function renderAll(){rebuild();renderHero();renderView();if(sheetFn)sheetFn()}
 
 function renderHero(){
-  const n=nowM(),off=offset();
+  rebuild();const n=nowM(),off=offset();
   const d=new Date();$("#clock").textContent=d.toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",hour12:false});
   const nx=SESS.find(s=>!isCalled(s)&&toM(s.s)>n);
   const h=$("#hero");
@@ -337,7 +351,10 @@ function renderView(){
   document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===tab));
   const v=$("#view");
   if(tab==="call")v.innerHTML=viewCall();
-  else if(tab==="sp"){if(!$("#spsearch")){v.innerHTML=`<h2>연사 ${Object.keys(SP).length}명</h2><p class="note">이름을 누르면 사진을 찍고 메모할 수 있어.</p><input id="spsearch" class="search" type="search" placeholder="이름이나 소속 검색" value="${esc(spQuery)}"><div id="splist"></div>`}$("#splist").innerHTML=viewSpList()}
+  else if(tab==="sp"){if(!$("#spsearch")){v.innerHTML=`<h2 id="sph"></h2><p class="note">이름을 누르면 사진을 찍고 메모할 수 있어.</p><input id="spsearch" class="search" type="search" placeholder="이름이나 소속 검색" value="${esc(spQuery)}"><div id="splist"></div>
+    <section class="card" style="margin-top:14px"><h3>연사 추가</h3><div class="use">큐시트에만 있는 연사, 사회자, 대체 연사를 넣어.</div>
+    <div class="fields" style="display:grid;gap:6px"><input class="in-t" id="nsp-name" placeholder="이름"><input class="in-t" id="nsp-org" placeholder="소속"><input class="in-t" id="nsp-title" placeholder="직함 (예: 사회자)"><label class="f" style="margin:4px 0 0">무대 시간 (모르면 비워둬)</label><input class="in-t" id="nsp-time" type="time"><div class="row"><button class="btn" data-addsp>연사 추가</button></div></div></section>`}
+    $("#sph").textContent="연사 "+Object.keys(SP).length+"명";$("#splist").innerHTML=viewSpList()}
   else if(tab==="room")v.innerHTML=viewRooms();
   else v.innerHTML=viewQA();
 }
@@ -358,16 +375,16 @@ function viewCall(){
       <div class="sps">${s.sp.map(id=>{const c=cst(s.id,id);return `<span class="spc${spd(id).arrived?" in":""}${c?" c"+c:""}"><button class="avb" data-sp="${id}" aria-label="${esc(SP[id][0])} 정보">${avatar(spd(id).photo,SP[id][0])}</button><button class="nmb" data-cyc="${s.id}|${id}">${esc(SP[id][0])}${c?`<span class="lbl">${c===1?"콜":"인계"}</span>`:`<span class="dot"></span>`}</button></span>`}).join("")}</div>
       ${missing&&n<start?`<div class="miss">라운지 미도착 ${missing}명</div>`:""}
       <div class="prog">콜 ${s.sp.filter(id=>cst(s.id,id)>=1).length}/${s.sp.length}, 인계 ${s.sp.filter(id=>cst(s.id,id)>=2).length}/${s.sp.length}</div>
-    </div></div>`}).join("");
+    </div></div>`}).join("")+(untimed().length?`<section class="card" style="margin-top:14px"><h3>시간 미정 연사 ${untimed().length}명</h3><div class="use">아젠다에 없는 연사야. 이름을 눌러 무대 시간을 넣으면 콜 순서에 들어가.</div><div class="sps">${untimed().map(id=>`<span class="spc${spd(id).arrived?" in":""}"><button class="avb" data-sp="${id}">${avatar(spd(id).photo,SP[id][0])}</button><button class="nmb" data-sp="${id}">${esc(SP[id][0])}<span class="dot"></span></button></span>`).join("")}</div></section>`:"");
 }
 
 function viewSpList(){
   const q=spQuery.trim().toLowerCase();
   const ids=Object.keys(SP).filter(id=>!q||SP[id].join(" ").toLowerCase().includes(q)||(spd(id).memo||"").toLowerCase().includes(q))
-    .sort((a,b)=>toM(firstSess(a).s)-toM(firstSess(b).s));
+    .sort((a,b)=>{const fa=firstSess(a),fb=firstSess(b);return (fa?toM(fa.s):9999)-(fb?toM(fb.s):9999)});
   if(!ids.length)return `<p class="note">'${esc(spQuery)}'에 맞는 연사가 없어.</p>`;
   return ids.map(id=>{const s=SP[id],d=spd(id),fs=firstSess(id);
-    return `<button class="sprow" data-sp="${id}">${avatar(d.photo,s[0])}<span class="grow"><span class="nm">${esc(s[0])}</span><br><span class="sub">${esc(s[3])}, ${esc(s[2])}</span></span><span class="when">${fs.s}<br><span class="badge ${d.arrived?"in":"out"}">${d.arrived?"도착":"미도착"}</span></span></button>`}).join("");
+    return `<button class="sprow" data-sp="${id}">${avatar(d.photo,s[0])}<span class="grow"><span class="nm">${esc(s[0])}</span><br><span class="sub">${esc(s[3])}, ${esc(s[2])}</span></span><span class="when">${fs?fs.s:"시간 미정"}<br><span class="badge ${d.arrived?"in":"out"}">${d.arrived?"도착":"미도착"}</span></span></button>`}).join("");
 }
 
 function viewRooms(){
@@ -412,9 +429,10 @@ function openSpeaker(id){
       <div><div class="nm">${esc(s[0])}</div><div class="en">${esc(s[1])}</div><div class="org">${esc(s[3])}, ${esc(s[2])}</div></div></div>
       <ul>${ss.map(x=>`<li><b>${x.s}</b>콜 ${fmt(toM(x.s)-off)}, ${esc(x.type)} ${esc(x.title)}</li>`).join("")}</ul>
       <div class="acts"><button class="tg${d.arrived?" on":""}" data-tg="speakers|${id}|arrived">${d.arrived?"라운지 도착함":"라운지 도착 체크"}</button>${d.photo?`<button class="tg" data-pick="speaker|${id}">사진 다시 찍기</button>`:""}</div>
+      ${inBase(id)?"":`<label class="f">무대 시간 (확인되면 입력)</label><input class="in-t" type="time" data-f="speakers|${id}|time" value="${esc((d.time||"").slice(0,5))}">${ss.length?"":`<p class="note" style="margin:6px 0 0">아젠다에 없는 연사야. 시간을 넣으면 콜 순서에 들어가.</p>`}`}
       <label class="f">동행인, 연락처</label><input class="in-t" data-f="speakers|${id}|contact" value="${esc(d.contact)}" placeholder="비서, 통역, 전화번호">
       <label class="f">메모</label><textarea class="in-t" data-f="speakers|${id}|memo" placeholder="옷차림, 요청사항 등">${esc(d.memo)}</textarea>
-      <div class="row" style="margin-top:14px"><button class="btn ghost" data-close style="flex:1">닫기</button></div>`;
+      <div class="row" style="margin-top:14px"><button class="btn ghost" data-close style="flex:1">닫기</button>${d.custom?`<button class="btn" style="background:var(--red)" data-del="speakers|${id}">연사 삭제</button>`:""}</div>`;
   };
   sheetFn();lockScroll();$("#sheet").classList.add("open");
 }
@@ -462,6 +480,9 @@ document.addEventListener("click",e=>{
   if(t.dataset.tab){tab=t.dataset.tab;saveCache();$("#view").innerHTML="";renderView();window.scrollTo(0,0);return}
   if(t.id==="hero"&&t.dataset.goto){if(tab!=="call"){tab="call";renderView()}const r=$("#row-"+t.dataset.goto);if(r)r.scrollIntoView({behavior:"smooth",block:"start"});return}
   if(t.dataset.room){roomSel=t.dataset.room;try{localStorage.setItem(LS+"-room",roomSel)}catch(_){}renderView();window.scrollTo(0,0);return}
+  if(t.dataset.addsp!==undefined){const ko=$("#nsp-name").value.trim();if(!ko){flash("이름을 먼저 적어줘.");$("#nsp-name").focus();return}
+    const cid="c"+Date.now().toString(36);put("speakers",cid,{custom:true,ko,org:$("#nsp-org").value.trim(),title:$("#nsp-title").value.trim(),time:$("#nsp-time").value,t:Date.now()});
+    ["#nsp-name","#nsp-org","#nsp-title","#nsp-time"].forEach(x=>$(x).value="");document.activeElement&&document.activeElement.blur();flash(ko+" 추가함");return}
   if(t.dataset.past!==undefined){showPast=!showPast;renderView();return}
   if(t.dataset.cyc){const[sid,spid]=t.dataset.cyc.split("|");const m=Object.assign({},sst(sid).sp||{});m[spid]=((m[spid]||0)+1)%3;patch("sessions",sid,{sp:m});return}
   if(t.dataset.sp){openSpeaker(t.dataset.sp);return}
@@ -469,7 +490,7 @@ document.addEventListener("click",e=>{
   if(t.dataset.set){const[c,id,f,v]=t.dataset.set.split("|");patch(c,id,{[f]:f==="callOffset"?Number(v):v});return}
   if(t.dataset.pick){pick=t.dataset.pick.split("|");if(pick[0]==="draft")drafts[pick[1]]=Object.assign(drafts[pick[1]]||{},{name:($("#pn-"+pick[1])||{}).value,org:($("#po-"+pick[1])||{}).value});$("#picker").click();return}
   if(t.dataset.view){const[c,id]=t.dataset.view.split("|");openViewer(c,id);return}
-  if(t.dataset.del){const[c,id]=t.dataset.del.split("|");if(confirm("삭제할까?")){remove(c,id);if(c==="roomphotos")closeSheet()}return}
+  if(t.dataset.del){const[c,id]=t.dataset.del.split("|");if(confirm("삭제할까?")){if(c==="speakers"||c==="roomphotos")closeSheet();remove(c,id)}return}
   if(t.dataset.close!==undefined){closeSheet();return}
   if(t.dataset.add){const r=t.dataset.add,name=$("#pn-"+r).value.trim(),org=$("#po-"+r).value.trim();
     if(!name){flash("이름을 먼저 적어줘.");$("#pn-"+r).focus();return}
