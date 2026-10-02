@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>BC룸 라운지</title>
 <meta name="theme-color" content="#0F2A47">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,6 +33,9 @@
 html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 76px)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:15px;line-height:1.5;-webkit-text-size-adjust:100%}
 button,input,textarea,select{font:inherit;color:inherit}
+html,body,button,a,input,textarea,label{touch-action:manipulation}
+input,textarea,select,.in-t,.search{font-size:16px!important}
+button{-webkit-tap-highlight-color:transparent}
 img{max-width:100%}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--amber);outline-offset:2px}
@@ -143,9 +146,9 @@ textarea.in-t{min-height:64px;resize:vertical}
 .q textarea{margin-top:8px}
 
 /* sheet */
-#sheet{position:fixed;inset:0;z-index:40;background:rgba(5,12,22,.55);display:none;align-items:flex-end;justify-content:center}
+#sheet{position:fixed;inset:0;z-index:40;overscroll-behavior:contain;background:rgba(5,12,22,.55);display:none;align-items:flex-end;justify-content:center}
 #sheet.open{display:flex}
-.sh{background:var(--card);width:100%;max-width:720px;max-height:92%;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom,0px))}
+.sh{overscroll-behavior:contain;-webkit-overflow-scrolling:touch;background:var(--card);width:100%;max-width:720px;max-height:92%;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom,0px))}
 .sh .big{width:100%;aspect-ratio:4/5;max-height:46vh;border-radius:12px;background:var(--chip);display:grid;place-items:center;overflow:hidden;border:0;padding:0;color:var(--muted);font-size:15px}
 .sh .big img{width:100%;height:100%;object-fit:cover}
 .sh .nm{font-size:21px;font-weight:700;margin-top:12px}
@@ -403,15 +406,18 @@ function openSpeaker(id){
       <label class="f">메모</label><textarea class="in-t" data-f="speakers|${id}|memo" placeholder="옷차림, 요청사항 등">${esc(d.memo)}</textarea>
       <div class="row" style="margin-top:14px"><button class="btn ghost" data-close style="flex:1">닫기</button></div>`;
   };
-  sheetFn();$("#sheet").classList.add("open");
+  sheetFn();lockScroll();$("#sheet").classList.add("open");
 }
 function openViewer(coll,id){
   const p=store[coll][id];if(!p)return;
   sheetFn=null;
   $("#sh").innerHTML=`<div class="viewer"><img src="${esc(p.img||p.photo)}" alt=""></div>${p.name?`<div class="nm">${esc(p.name)}</div><div class="org">${esc(p.org)}</div>`:""}<div class="row" style="margin-top:12px"><button class="btn ghost" data-close style="flex:1">닫기</button>${coll==="roomphotos"?`<button class="btn" style="background:var(--red)" data-del="roomphotos|${id}">사진 삭제</button>`:""}</div>`;
-  $("#sheet").classList.add("open");
+  lockScroll();$("#sheet").classList.add("open");
 }
-function closeSheet(){sheetFn=null;$("#sheet").classList.remove("open")}
+let lockY=0;
+function lockScroll(){const b=document.body;if(b.style.position==="fixed")return;lockY=window.scrollY;b.style.position="fixed";b.style.top=(-lockY)+"px";b.style.left="0";b.style.right="0"}
+function unlockScroll(){const b=document.body;if(b.style.position!=="fixed")return;b.style.position="";b.style.top="";b.style.left="";b.style.right="";window.scrollTo(0,lockY)}
+function closeSheet(){sheetFn=null;$("#sheet").classList.remove("open");unlockScroll()}
 
 function shrink(file,max=560,q=.72){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),img=new Image();
   img.onload=()=>{const s=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight)),c=document.createElement("canvas");c.width=Math.round(img.naturalWidth*s);c.height=Math.round(img.naturalHeight*s);c.getContext("2d").drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",q))};
