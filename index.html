@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BC룸 라운지</title>
+<meta name="theme-color" content="#0F2A47">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BC룸">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF1F5;--card:#FFFFFF;--ink:#14213D;--muted:#5F6B7A;--line:#DCE1E8;--chip:#EEF1F5;
+  --navy:#0F2A47;--navy-ink:#FFFFFF;--navy-muted:#A9B8CC;
+  --amber:#F5B700;--amber-ink:#2E2300;--green:#1F9D6B;--green-soft:#DDF3EA;--red:#D64545;--red-soft:#FBE3E3;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0D1520;--card:#162231;--ink:#E8EDF4;--muted:#9AA7B8;--line:#26364A;--chip:#1E2D40;
+  --navy:#08192B;--navy-muted:#7F93AD;--green-soft:#123A2C;--red-soft:#3D1C1F;color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0D1520;--card:#162231;--ink:#E8EDF4;--muted:#9AA7B8;--line:#26364A;--chip:#1E2D40;
+  --navy:#08192B;--navy-muted:#7F93AD;--green-soft:#123A2C;--red-soft:#3D1C1F;color-scheme:dark;}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 150px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:15px;line-height:1.5;-webkit-text-size-adjust:100%}
+button,input,textarea,select{font:inherit;color:inherit}
+img{max-width:100%}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--navy);color:var(--navy-ink);padding:10px 16px 12px}
+.bar{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.place{font-weight:600;font-size:14px}
+.sync{font-size:12px;color:var(--navy-muted)}
+.clock{font-variant-numeric:tabular-nums;font-size:13px;color:var(--navy-muted)}
+.hero{margin-top:8px;border-radius:14px;padding:10px 14px;background:rgba(255,255,255,.08);display:block;width:100%;text-align:left;border:0;color:inherit}
+.hero .hl{font-size:13px;color:var(--navy-muted)}
+.hero .hb{display:flex;align-items:baseline;gap:10px}
+.hero .ht{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.5px;line-height:1.15}
+.hero .hd{font-size:15px;font-weight:500}
+.hero .hn{font-size:14px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero.urgent{background:var(--amber);color:var(--amber-ink)}
+.hero.urgent .hl{color:var(--amber-ink);font-weight:600}
+.live{margin-top:6px;font-size:12.5px;color:var(--navy-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+main{padding:14px 14px 96px;max-width:720px;margin:0 auto}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{flex:1;border:0;background:none;padding:12px 0 13px;font-size:14px;color:var(--muted);font-weight:500}
+nav button[aria-selected="true"]{color:var(--ink);font-weight:700;box-shadow:inset 0 3px 0 var(--amber)}
+
+h2{font-size:18px;margin:6px 2px 10px}
+.note{font-size:13px;color:var(--muted);margin:0 2px 12px}
+
+/* sessions */
+.sess{display:grid;grid-template-columns:62px 1fr;gap:10px;background:var(--card);border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid var(--line)}
+.sess .tm b{display:block;font-size:17px;font-variant-numeric:tabular-nums}
+.sess .tm span{display:block;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.sess .tm em{display:inline-block;margin-top:6px;font-style:normal;font-size:12px;font-weight:600;padding:1px 6px;border-radius:6px;background:var(--chip);font-variant-numeric:tabular-nums}
+.sess.callnow{border:2px solid var(--amber)}
+.sess.callnow .tm em{background:var(--amber);color:var(--amber-ink)}
+.sess.onstage{border-left:5px solid var(--green)}
+.sess.past{opacity:.55}
+.stype{font-size:12px;color:var(--muted)}
+.stitle{font-weight:600;font-size:14.5px;line-height:1.4}
+.sps{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.spc{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--bg);border-radius:20px;padding:3px 10px 3px 3px;font-size:13px}
+.spc .dot{width:7px;height:7px;border-radius:50%;background:var(--red)}
+.spc.in .dot{background:var(--green)}
+.av{width:26px;height:26px;border-radius:50%;background:var(--chip);display:grid;place-items:center;font-size:12px;font-weight:600;overflow:hidden;flex:none}
+.av img{width:100%;height:100%;object-fit:cover}
+.acts{display:flex;gap:6px;margin-top:10px}
+.tg{flex:1;border:1px solid var(--line);background:var(--card);border-radius:9px;padding:8px 6px;font-size:13.5px;font-weight:500}
+.tg.on{background:var(--green);border-color:var(--green);color:#fff}
+.miss{font-size:12px;color:var(--red);margin-top:6px;font-weight:500}
+
+/* speakers */
+.search{width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);margin-bottom:10px}
+.sprow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:6px}
+.sprow .av{width:48px;height:48px;font-size:17px}
+.sprow .nm{font-weight:600}
+.sprow .sub{font-size:12.5px;color:var(--muted)}
+.sprow .grow{flex:1;min-width:0}
+.sprow .when{font-variant-numeric:tabular-nums;font-size:13px;font-weight:600;text-align:right}
+.badge{display:inline-block;font-size:11.5px;font-weight:600;padding:1px 7px;border-radius:6px;margin-top:3px}
+.badge.in{background:var(--green-soft);color:var(--green)}
+.badge.out{background:var(--red-soft);color:var(--red)}
+
+/* cards */
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h3{margin:0;font-size:17px}
+.card .use{font-size:13px;color:var(--muted);margin-bottom:10px}
+label.f{display:block;font-size:12.5px;color:var(--muted);margin:10px 0 4px}
+.in-t{width:100%;padding:9px 11px;border-radius:9px;border:1px solid var(--line);background:var(--bg)}
+textarea.in-t{min-height:64px;resize:vertical}
+.seg{display:flex;gap:6px}
+.seg button{flex:1;border:1px solid var(--line);background:var(--bg);border-radius:9px;padding:8px 4px;font-size:13px}
+.seg button.on{background:var(--ink);color:var(--card);border-color:var(--ink);font-weight:600}
+.photos{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
+.photos button{aspect-ratio:1;border-radius:9px;border:1px dashed var(--line);background:var(--bg);padding:0;overflow:hidden;font-size:12.5px;color:var(--muted)}
+.photos img{width:100%;height:100%;object-fit:cover;display:block}
+.person{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.person .av{width:42px;height:42px}
+.person .grow{flex:1;min-width:0}
+.person .sub{font-size:12.5px;color:var(--muted)}
+.x{border:0;background:none;color:var(--muted);font-size:13px;padding:6px}
+.addp{display:grid;grid-template-columns:52px 1fr;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.addp .cam{width:52px;height:52px;border-radius:50%;border:1px dashed var(--line);background:var(--bg);padding:0;overflow:hidden;font-size:11.5px;color:var(--muted)}
+.addp .cam img{width:100%;height:100%;object-fit:cover}
+.addp .fields{display:grid;gap:6px}
+.btn{border:0;background:var(--ink);color:var(--card);border-radius:9px;padding:9px 14px;font-weight:600;font-size:14px}
+.btn.ghost{background:var(--chip);color:var(--ink)}
+.row{display:flex;gap:8px;align-items:center}
+
+/* qa */
+.q{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px}
+.q.ok{border-color:var(--green)}
+.q .qt{display:flex;gap:10px;align-items:flex-start;font-weight:600;font-size:14.5px}
+.q .qt input{width:20px;height:20px;margin-top:2px;accent-color:var(--green);flex:none}
+.q textarea{margin-top:8px}
+
+/* sheet */
+#sheet{position:fixed;inset:0;z-index:40;background:rgba(5,12,22,.55);display:none;align-items:flex-end;justify-content:center}
+#sheet.open{display:flex}
+.sh{background:var(--card);width:100%;max-width:720px;max-height:92%;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom,0px))}
+.sh .big{width:100%;aspect-ratio:4/5;max-height:46vh;border-radius:12px;background:var(--chip);display:grid;place-items:center;overflow:hidden;border:0;padding:0;color:var(--muted);font-size:15px}
+.sh .big img{width:100%;height:100%;object-fit:cover}
+.sh .nm{font-size:21px;font-weight:700;margin-top:12px}
+.sh .en{color:var(--muted);font-size:14px}
+.sh .org{font-size:14px;margin-top:2px}
+.sh ul{margin:8px 0 0;padding:0;list-style:none}
+.sh li{font-size:13.5px;padding:6px 0;border-top:1px solid var(--line)}
+.sh li b{font-variant-numeric:tabular-nums;margin-right:6px}
+.viewer img{width:100%;border-radius:12px;display:block}
+#toast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--card);padding:8px 14px;border-radius:10px;font-size:13.5px;z-index:50;display:none;max-width:90%}
+@media (prefers-reduced-motion:no-preference){.hero.urgent{animation:pulse 1.6s ease-in-out infinite}}
+@keyframes pulse{50%{filter:brightness(1.08)}}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar"><span class="place">2층 BC룸 연사 라운지</span><span class="clock" id="clock">--:--</span></div>
+  <div class="sync" id="sync">불러오는 중</div>
+  <button class="hero" id="hero" type="button"></button>
+  <div class="live" id="live"></div>
+</header>
+<main id="view"></main>
+<nav role="tablist">
+  <button role="tab" data-tab="call">콜 순서</button>
+  <button role="tab" data-tab="sp">연사</button>
+  <button role="tab" data-tab="room">방</button>
+  <button role="tab" data-tab="qa">확인사항</button>
+</nav>
+<div id="sheet"><div class="sh" id="sh"></div></div>
+<div id="toast"></div>
+<input type="file" id="picker" accept="image/*" capture="environment" hidden>
+
+<script>
+const SP = {
+  "crypto-eri":["에리 이시야마","Crypto Eri","공동창업자","오나미 프레스"],
+  "asheesh-birla":["아시시 비를라","Asheesh Birla","창업자 겸 대표","에버노스"],
+  "hugo-philion":["휴고 필리온","Hugo Philion","공동창업자","플레어"],
+  "nicholas-motz":["니컬러스 모츠","Nicholas Motz","공동창업자","소일"],
+  "connor-sullivan":["코너 설리번","Connor Sullivan","최고 전략 책임자","파이어라이트"],
+  "christina-chan":["크리스티나 찬","Christina Chan","생태계 성장 부문 시니어 디렉터","리플"],
+  "chandler-fang":["챈들러 팡","Chandler Fang","창업자","t54 랩스"],
+  "monica-long":["모니카 롱","Monica Long","사장","리플"],
+  "jinnie-lee":["지니 리","Jinnie Lee","영업 이사","리플"],
+  "jaehyuk-choi":["최재혁","Jaehyuk Choi","TF 리드","케이뱅크"],
+  "heejin-shin":["신희진","Heejin Shin","신사업담당 이사","교보증권"],
+  "seunghoon-han":["한승훈","Seunghoon Han","차장","우리은행"],
+  "mansik-yoon":["윤만식","Mansik Yoon","팀장","전북은행"],
+  "tatsuya-kohrogi":["타츠야 코로기","Tatsuya Kohrogi","생태계 성장 부문 시니어 매니저","리플"],
+  "sabrina-tachdjian":["사브리나 타치지안","Sabrina Tachdjian","사장","XRP 아시아"],
+  "ayo-akinyele":["아요 아킨옐레","Ayo Akinyele","엔지니어링 부문 시니어 디렉터","리플"],
+  "sunghwan-kim":["김성환","Sunghwan Kim","창업자 겸 대표","케이웨더 (웰비안랩스)"],
+  "nathaniel-bradley":["나다니엘 T. 브래들리","Nathaniel T. Bradley","대표","데이터볼트 AI"],
+  "johnny-youn":["윤장혁","Johnny Youn","대표","리스크엑스"],
+  "bo-kim":["김영식","Bo Kim","대표","크레더"],
+  "wenny-cai":["웨니 카이","Wenny Cai","공동창업자 겸 대표","앵커드 파이낸스"],
+  "joyce-cui":["조이스 추이","Joyce Cui","파트너","아세토 핀테크"],
+  "jake-ku":["제이크 구","Jake Ku","그로스 총괄","카탈라이즈"],
+  "jonghan-park":["박종한","Jonghan Park","대표","박작가의 크립토연구소"],
+  "donghwan-kim":["김동환","Donghwan Kim","대표","대니월드"],
+  "changhoon-moon":["문창훈","Changhoon Moon","대표","타임레버리지"],
+  "john-lilic":["존 릴릭","John Lilic","최고 전략 책임자","트리아"],
+  "ruam-siratanapanta":["루암 시라타나판타","Ruam Siratanapanta","디지털자산사업 총괄","SCBX"],
+  "aniket-jindal":["아니켓 진달","Aniket Jindal","창업자","바이코노미"],
+  "adam-oozeer":["아담 우지어","Adam Oozeer","그로스 총괄","엑셀라"],
+  "taro-kimura":["타로 키무라","Taro Kimura","일본 총괄","미드나잇 재단"],
+  "ryo-sakai":["료 사카이","Ryo Sakai","대표","웹엑스"],
+  "justin-bram":["저스틴 브램","Justin Bram","프로덕트 총괄","베리에이셔널"],
+  "marcin-kazmierczak":["마르친 카즈미에르차크","Marcin Kazmierczak","공동창업자","레드스톤"],
+  "stephanie-chew":["스테파니 츄","Stephanie Chew","최고 전략 책임자","오픈에덴"],
+  "johann-kerbrat":["요한 케르브라","Johann Kerbrat","수석부사장 겸 총괄책임자","로빈후드"],
+  "leonard-hoh":["레너드 호","Leonard Hoh","사장","비트스탬프 아시아태평양"],
+  "alex-toh":["알렉스 토","Alex Toh","핀테크 투자 부문 전무","SC벤처스"],
+  "samuel-shim":["사무엘 심","Samuel Shim","글로벌 디지털자산 총괄","메리츠증권"],
+  "pablo-che-leo":["파블로 체 레오","Pablo Che Leo","그로스 총괄","리프"],
+  "lacey-wisdom":["레이시 위즈덤","Lacey Wisdom","제너럴 파트너","PL캐피탈"],
+  "leo-lee":["이한길","Leo Lee","팀장","카카오뱅크"],
+  "fig":["피그","Fig","공동창업자","스퀴드"]
+};
+const SESS = [
+  ["s3","12:05","12:35","패널","XRP 활용과 자산 토큰화 전망",["crypto-eri","asheesh-birla","hugo-philion","nicholas-motz","connor-sullivan"]],
+  ["s4","12:35","12:55","대담","XRPL 기반 AI 에이전트 경제, 어디까지 왔나",["christina-chan","chandler-fang"]],
+  ["s5","12:55","13:15","대담","리플의 기관 금융 전략과 XRP",["christina-chan","monica-long"]],
+  ["s6","13:15","13:30","키노트","XRPL로 만드는 신뢰 기반 AI 에이전트 경제",["chandler-fang"]],
+  ["s7","13:30","13:45","키노트","XRP 기반 프로그래머블 자본",["hugo-philion"]],
+  ["s8","13:45","14:15","패널","해외송금부터 예금토큰까지",["jinnie-lee","jaehyuk-choi","heejin-shin","seunghoon-han","mansik-yoon"]],
+  ["s9","14:15","14:35","대담","특별 발표: 아시아 XRP 생태계의 다음 행보",["tatsuya-kohrogi","sabrina-tachdjian"]],
+  ["s10","14:35","14:50","키노트","XRPL 대중화, 무엇을 준비해야 하나",["ayo-akinyele"]],
+  ["s11","14:50","15:05","키노트","날씨 데이터 비즈니스의 새로운 기회",["sunghwan-kim"]],
+  ["s12","15:05","15:20","키노트","토큰화 자산 운영 시스템",["nathaniel-bradley"]],
+  ["s13","15:20","15:50","패널","XRPL 실사용 사례",["tatsuya-kohrogi","johnny-youn","bo-kim","wenny-cai","joyce-cui"]],
+  ["s14","15:50","16:10","패널","XRP 생태계, 어떻게 키울까",["jake-ku","jonghan-park","donghwan-kim","changhoon-moon"]],
+  ["s15","16:10","16:25","키노트","Tria가 바라보는 XRP 네오뱅크: 결제, 예치, 대출",["john-lilic"]],
+  ["s16","16:25","16:55","패널","온체인 금융, 인프라에서 실사용까지",["ruam-siratanapanta","aniket-jindal","adam-oozeer","taro-kimura"]],
+  ["s17","16:55","17:25","패널","토큰화 자산 거래 시장 만들기",["ryo-sakai","justin-bram","marcin-kazmierczak","stephanie-chew"]],
+  ["s18","17:25","17:45","대담","온체인 혁신의 새로운 물결",["johann-kerbrat","leonard-hoh"]],
+  ["s19","17:45","18:10","패널","금융권은 토큰화자산을 어떻게 준비하고 있나",["alex-toh","nathaniel-bradley","samuel-shim","pablo-che-leo"]],
+  ["s20","18:10","18:35","패널","스테이블코인, 일상 금융 속으로",["lacey-wisdom","leo-lee","john-lilic","fig"]]
+].map(a=>({id:a[0],s:a[1],e:a[2],type:a[3],title:a[4],sp:a[5]}));
+const ROOMS = [
+  {id:"BC9",use:"연사 라운지 (Speaker Zone)",note:"연사는 '연사' 탭에서 관리해. 여기엔 연사 외 VIP나 동행인을 적어."},
+  {id:"BC7",use:"리플 스폰서 룸"},
+  {id:"BC6",use:"플래티넘 스폰서 룸"},
+  {id:"BC8",use:"플래티넘 스폰서 룸"}
+];
+const QS = [
+  ["q1","연사 콜은 세션 몇 분 전에 하나요?"],
+  ["q2","무전기를 받나요? 채널은?"],
+  ["q3","연사를 1층까지 동행할 때 라운지는 누가 지키나요?"],
+  ["q4","1층 GB VIP룸(Speaker Room)에서 누구에게 인계하나요?"],
+  ["q5","BC6, BC8은 각각 어느 회사인가요?"],
+  ["q6","스폰서 룸 출입 제한이 있나요? 명단은?"],
+  ["q7","연사 외 VIP 게스트도 라운지를 쓰나요?"],
+  ["q8","연사 사진 자료가 있나요?"],
+  ["q9","라운지 다과는 누가, 언제 채우나요?"],
+  ["q10","내 식사 시간과 장소는?"]
+];
+const COLLS=["speakers","sessions","rooms","people","roomphotos","qa"];
+
+let store={speakers:{},sessions:{},rooms:{},people:{},roomphotos:{},qa:{}};
+let tab="call", spQuery="", sheetFn=null, pendingRender=false, pick=null;
+const drafts={};
+const LS="bc-lounge-v1";
+try{const t=localStorage.getItem(LS+"-tab");if(t)tab=t}catch(e){}
+function idb(){return new Promise((res,rej)=>{const r=indexedDB.open("bc-lounge",1);r.onupgradeneeded=()=>r.result.createObjectStore("kv");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+let idbP=null;const getDB=()=>idbP||(idbP=idb());
+async function idbGet(k){const d=await getDB();return new Promise((res,rej)=>{const q=d.transaction("kv").objectStore("kv").get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}
+async function idbSet(k,v){const d=await getDB();return new Promise((res,rej)=>{const tx=d.transaction("kv","readwrite");tx.objectStore("kv").put(v,k);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error)})}
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const toM=t=>{const[h,m]=t.split(":").map(Number);return h*60+m};
+const fmt=m=>{m=Math.round(m);return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0")};
+const nowM=()=>{const d=new Date();return d.getHours()*60+d.getMinutes()+d.getSeconds()/60};
+const offset=()=>Number((store.qa.settings||{}).callOffset)||20;
+const sst=id=>store.sessions[id]||{};
+const spd=id=>store.speakers[id]||{};
+const firstSess=id=>SESS.find(s=>s.sp.includes(id));
+const avatar=(img,name)=>img?`<span class="av"><img src="${esc(img)}" alt=""></span>`:`<span class="av">${esc((name||"?").slice(0,1))}</span>`;
+
+function flash(t){const el=$("#toast");el.textContent=t;el.style.display="block";clearTimeout(flash.t);flash.t=setTimeout(()=>el.style.display="none",2600)}
+function saveCache(){
+  try{localStorage.setItem(LS+"-tab",tab)}catch(e){}
+  clearTimeout(saveCache.t);
+  saveCache.t=setTimeout(()=>{idbSet("store",store).catch(()=>flash("저장 안 됨. 폰 저장공간을 확인해 줘."))},300);
+}
+const chains={};
+function put(coll,id,data){
+  store[coll]=Object.assign({},store[coll],{[id]:data});
+  saveCache();schedule();
+}
+function patch(coll,id,f){put(coll,id,Object.assign({},store[coll][id]||{},f,{t:Date.now()}))}
+function remove(coll,id){
+  const c=Object.assign({},store[coll]);delete c[id];store[coll]=c;saveCache();schedule();
+}
+
+function schedule(){
+  const a=document.activeElement;
+  if(a&&(a.tagName==="INPUT"||a.tagName==="TEXTAREA")&&a.type!=="checkbox"&&a.type!=="file"){pendingRender=true;return}
+  requestAnimationFrame(renderAll);
+}
+document.addEventListener("focusout",()=>{if(pendingRender){pendingRender=false;setTimeout(()=>schedule(),50)}});
+
+function renderAll(){renderHero();renderView();if(sheetFn)sheetFn()}
+
+function renderHero(){
+  const n=nowM(),off=offset();
+  const d=new Date();$("#clock").textContent=d.toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",hour12:false});
+  const nx=SESS.find(s=>!sst(s.id).called&&toM(s.s)>n);
+  const h=$("#hero");
+  if(nx){
+    const call=toM(nx.s)-off,left=Math.ceil(call-n),urgent=left<=0;
+    h.className="hero"+(urgent?" urgent":"");h.dataset.goto=nx.id;
+    const names=nx.sp.map(id=>SP[id][0]).join(", ");
+    h.innerHTML=`<div class="hl">${urgent?"지금 콜할 차례":"다음 콜"}</div><div class="hb"><span class="ht">${fmt(call)}</span><span class="hd">${urgent?`무대 시작 ${Math.max(0,Math.ceil(toM(nx.s)-n))}분 전`:left>=60?`${Math.floor(left/60)}시간 ${left%60}분 후`:`${left}분 후`}</span></div><div class="hn">${esc(nx.type)} ${esc(names)}</div>`;
+  }else{h.className="hero";delete h.dataset.goto;h.innerHTML=`<div class="hl">남은 콜</div><div class="hb"><span class="ht">없음</span></div><div class="hn">오늘 콜을 모두 마쳤어.</div>`}
+  const live=SESS.find(s=>n>=toM(s.s)&&n<toM(s.e));
+  const done=SESS.filter(s=>sst(s.id).called).length;
+  $("#live").textContent=(live?`무대 진행 중: ${live.type} ${live.title}  |  `:"")+`콜 완료 ${done}/${SESS.length}`;
+}
+
+function renderView(){
+  document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===tab));
+  const v=$("#view");
+  if(tab==="call")v.innerHTML=viewCall();
+  else if(tab==="sp"){if(!$("#spsearch")){v.innerHTML=`<h2>연사 ${Object.keys(SP).length}명</h2><p class="note">이름을 누르면 사진을 찍고 메모할 수 있어.</p><input id="spsearch" class="search" type="search" placeholder="이름이나 소속 검색" value="${esc(spQuery)}"><div id="splist"></div>`}$("#splist").innerHTML=viewSpList()}
+  else if(tab==="room")v.innerHTML=viewRooms();
+  else v.innerHTML=viewQA();
+}
+
+function viewCall(){
+  const n=nowM(),off=offset();
+  return `<h2>세션별 콜 순서</h2><p class="note">콜은 세션 시작 ${off}분 전 기준이야. 확인사항 탭에서 바꿀 수 있어.</p>`+SESS.map(s=>{
+    const st=sst(s.id),call=toM(s.s)-off,start=toM(s.s),end=toM(s.e);
+    let cls="sess";
+    if(n>=end)cls+=" past";else if(n>=start)cls+=" onstage";else if(n>=call&&!st.called)cls+=" callnow";
+    const missing=s.sp.filter(id=>!spd(id).arrived).length;
+    return `<div class="${cls}" id="row-${s.id}"><div class="tm"><b>${s.s}</b><span>~${s.e}</span><em>콜 ${fmt(call)}</em></div><div>
+      <div class="stype">${esc(s.type)}</div><div class="stitle">${esc(s.title)}</div>
+      <div class="sps">${s.sp.map(id=>`<button class="spc${spd(id).arrived?" in":""}" data-sp="${id}">${avatar(spd(id).photo,SP[id][0])}${esc(SP[id][0])}<span class="dot"></span></button>`).join("")}</div>
+      ${missing&&n<start?`<div class="miss">라운지 미도착 ${missing}명</div>`:""}
+      <div class="acts"><button class="tg${st.called?" on":""}" data-tg="sessions|${s.id}|called">${st.called?"콜 완료":"콜하기"}</button><button class="tg${st.moved?" on":""}" data-tg="sessions|${s.id}|moved">${st.moved?"1층 인계 완료":"1층 인계"}</button></div>
+    </div></div>`}).join("");
+}
+
+function viewSpList(){
+  const q=spQuery.trim().toLowerCase();
+  const ids=Object.keys(SP).filter(id=>!q||SP[id].join(" ").toLowerCase().includes(q)||(spd(id).memo||"").toLowerCase().includes(q))
+    .sort((a,b)=>toM(firstSess(a).s)-toM(firstSess(b).s));
+  if(!ids.length)return `<p class="note">'${esc(spQuery)}'에 맞는 연사가 없어.</p>`;
+  return ids.map(id=>{const s=SP[id],d=spd(id),fs=firstSess(id);
+    return `<button class="sprow" data-sp="${id}">${avatar(d.photo,s[0])}<span class="grow"><span class="nm">${esc(s[0])}</span><br><span class="sub">${esc(s[3])}, ${esc(s[2])}</span></span><span class="when">${fs.s}<br><span class="badge ${d.arrived?"in":"out"}">${d.arrived?"도착":"미도착"}</span></span></button>`}).join("");
+}
+
+function viewRooms(){
+  return `<h2>2층 BC룸</h2><p class="note">홍의진 PC에게 들은 내용을 방마다 채워 넣어.</p>`+ROOMS.map(r=>{
+    const d=store.rooms[r.id]||{};
+    const photos=Object.entries(store.roomphotos).filter(([,p])=>p.room===r.id).sort((a,b)=>(a[1].t||0)-(b[1].t||0));
+    const people=Object.entries(store.people).filter(([,p])=>p.room===r.id).sort((a,b)=>(a[1].t||0)-(b[1].t||0));
+    const dr=drafts[r.id]||{};
+    const acc=d.access||"미확인";
+    return `<section class="card"><h3>${r.id}</h3><div class="use">${esc(r.use)}</div>
+      ${r.note?`<p class="note" style="margin:0 0 4px">${esc(r.note)}</p>`:""}
+      <label class="f">이용 회사</label><input class="in-t" data-f="rooms|${r.id}|company" value="${esc(d.company)}" placeholder="예: 도플러 파이낸스">
+      <label class="f">담당자와 연락처</label><input class="in-t" data-f="rooms|${r.id}|contact" value="${esc(d.contact)}" placeholder="이름, 전화번호">
+      <label class="f">출입</label><div class="seg">${["미확인","누구나","명단만"].map(o=>`<button class="${acc===o?"on":""}" data-set="rooms|${r.id}|access|${o}">${o}</button>`).join("")}</div>
+      <label class="f">메모</label><textarea class="in-t" data-f="rooms|${r.id}|memo" placeholder="세팅, 다과, 특이사항">${esc(d.memo)}</textarea>
+      <label class="f">방 사진</label><div class="photos">${photos.map(([pid,p])=>`<button data-view="roomphotos|${pid}"><img src="${esc(p.img)}" alt="${r.id} 사진"></button>`).join("")}<button data-pick="roomphoto|${r.id}">+ 사진</button></div>
+      <label class="f">명단 ${people.length}명</label>
+      ${people.map(([pid,p])=>`<div class="person">${p.photo?`<button class="av" style="border:0;padding:0" data-view="people|${pid}"><img src="${esc(p.photo)}" alt=""></button>`:avatar("",p.name)}<div class="grow"><b>${esc(p.name)}</b><div class="sub">${esc(p.org)}</div></div><button class="x" data-del="people|${pid}">삭제</button></div>`).join("")||`<p class="note" style="margin:4px 0 0">아직 없어. 아래에서 추가해.</p>`}
+      <div class="addp"><button class="cam" data-pick="draft|${r.id}">${dr.photo?`<img src="${dr.photo}" alt="">`:"사진"}</button>
+        <div class="fields"><input class="in-t" id="pn-${r.id}" placeholder="이름" value="${esc(dr.name)}"><input class="in-t" id="po-${r.id}" placeholder="소속, 직함" value="${esc(dr.org)}"><div class="row"><button class="btn" data-add="${r.id}">명단에 추가</button></div></div></div>
+    </section>`}).join("");
+}
+
+function viewQA(){
+  const set=store.qa.settings||{};
+  const custom=Object.entries(store.qa).filter(([k,v])=>k!=="settings"&&v.custom).sort((a,b)=>(a[1].c||0)-(b[1].c||0)).map(([k,v])=>[k,v.text]);
+  const all=QS.concat(custom);
+  const okN=all.filter(([id])=>(store.qa[id]||{}).ok).length;
+  return `<h2>홍의진 PC 확인사항</h2>
+  <section class="card"><label class="f" style="margin-top:0">홍의진 PC 연락처</label><div class="row"><input class="in-t" type="tel" data-f="qa|settings|pcPhone" value="${esc(set.pcPhone)}" placeholder="010-">${set.pcPhone?`<a class="btn" href="tel:${esc(set.pcPhone.replace(/[^0-9+]/g,""))}" style="text-decoration:none">전화</a>`:""}</div>
+  <label class="f">콜 시간 (세션 시작 몇 분 전)</label><div class="seg">${[10,15,20,25,30].map(o=>`<button class="${offset()===o?"on":""}" data-set="qa|settings|callOffset|${o}">${o}분</button>`).join("")}</div></section>
+  <p class="note">${okN}/${all.length}개 확인함. 답을 적고 체크해.</p>
+  ${all.map(([id,text])=>{const d=store.qa[id]||{};return `<div class="q${d.ok?" ok":""}"><label class="qt"><input type="checkbox" data-ck="qa|${id}|ok"${d.ok?" checked":""}><span>${esc(text)}</span></label><textarea class="in-t" data-f="qa|${id}|a" placeholder="답 적기">${esc(d.a)}</textarea>${d.custom?`<button class="x" data-del="qa|${id}">질문 삭제</button>`:""}</div>`}).join("")}
+  <div class="row" style="margin-top:6px"><input class="in-t" id="newq" placeholder="질문 추가"><button class="btn" id="addq">추가</button></div>`;
+}
+
+function openSpeaker(id){
+  sheetFn=()=>{
+    const s=SP[id],d=spd(id),ss=SESS.filter(x=>x.sp.includes(id)),off=offset();
+    $("#sh").innerHTML=`<button class="big" data-pick="speaker|${id}">${d.photo?`<img src="${esc(d.photo)}" alt="${esc(s[0])}">`:"눌러서 사진 찍기"}</button>
+      <div class="nm">${esc(s[0])}</div><div class="en">${esc(s[1])}</div><div class="org">${esc(s[3])}, ${esc(s[2])}</div>
+      <ul>${ss.map(x=>`<li><b>${x.s}</b>콜 ${fmt(toM(x.s)-off)}, ${esc(x.type)} ${esc(x.title)}</li>`).join("")}</ul>
+      <div class="acts"><button class="tg${d.arrived?" on":""}" data-tg="speakers|${id}|arrived">${d.arrived?"라운지 도착함":"라운지 도착 체크"}</button>${d.photo?`<button class="tg" data-pick="speaker|${id}">사진 다시 찍기</button>`:""}</div>
+      <label class="f">동행인, 연락처</label><input class="in-t" data-f="speakers|${id}|contact" value="${esc(d.contact)}" placeholder="비서, 통역, 전화번호">
+      <label class="f">메모</label><textarea class="in-t" data-f="speakers|${id}|memo" placeholder="옷차림, 요청사항 등">${esc(d.memo)}</textarea>
+      <div class="row" style="margin-top:14px"><button class="btn ghost" data-close style="flex:1">닫기</button></div>`;
+  };
+  sheetFn();$("#sheet").classList.add("open");
+}
+function openViewer(coll,id){
+  const p=store[coll][id];if(!p)return;
+  sheetFn=null;
+  $("#sh").innerHTML=`<div class="viewer"><img src="${esc(p.img||p.photo)}" alt=""></div>${p.name?`<div class="nm">${esc(p.name)}</div><div class="org">${esc(p.org)}</div>`:""}<div class="row" style="margin-top:12px"><button class="btn ghost" data-close style="flex:1">닫기</button>${coll==="roomphotos"?`<button class="btn" style="background:var(--red)" data-del="roomphotos|${id}">사진 삭제</button>`:""}</div>`;
+  $("#sheet").classList.add("open");
+}
+function closeSheet(){sheetFn=null;$("#sheet").classList.remove("open")}
+
+function shrink(file,max=560,q=.72){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),img=new Image();
+  img.onload=()=>{const s=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight)),c=document.createElement("canvas");c.width=Math.round(img.naturalWidth*s);c.height=Math.round(img.naturalHeight*s);c.getContext("2d").drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",q))};
+  img.onerror=()=>{URL.revokeObjectURL(u);rej()};img.src=u})}
+
+$("#picker").addEventListener("change",async e=>{
+  const f=e.target.files&&e.target.files[0];e.target.value="";if(!f||!pick)return;
+  let data;try{data=await shrink(f)}catch(_){flash("사진을 읽지 못했어. 다른 사진으로 해줘.");return}
+  const[kind,id]=pick;
+  if(kind==="speaker")patch("speakers",id,{photo:data});
+  else if(kind==="roomphoto"){const pid="p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);put("roomphotos",pid,{room:id,img:data,t:Date.now()})}
+  else if(kind==="draft"){drafts[id]=Object.assign(drafts[id]||{},{photo:data,name:($("#pn-"+id)||{}).value,org:($("#po-"+id)||{}).value});schedule()}
+});
+
+document.addEventListener("click",e=>{
+  const t=e.target.closest("button,[data-goto]");
+  if(e.target.id==="sheet"){closeSheet();return}
+  if(!t)return;
+  if(t.dataset.tab){tab=t.dataset.tab;saveCache();$("#view").innerHTML="";renderView();window.scrollTo(0,0);return}
+  if(t.id==="hero"&&t.dataset.goto){if(tab!=="call"){tab="call";renderView()}const r=$("#row-"+t.dataset.goto);if(r)r.scrollIntoView({behavior:"smooth",block:"start"});return}
+  if(t.dataset.sp){openSpeaker(t.dataset.sp);return}
+  if(t.dataset.tg){const[c,id,f]=t.dataset.tg.split("|");patch(c,id,{[f]:!(store[c][id]||{})[f]});return}
+  if(t.dataset.set){const[c,id,f,v]=t.dataset.set.split("|");patch(c,id,{[f]:f==="callOffset"?Number(v):v});return}
+  if(t.dataset.pick){pick=t.dataset.pick.split("|");if(pick[0]==="draft")drafts[pick[1]]=Object.assign(drafts[pick[1]]||{},{name:($("#pn-"+pick[1])||{}).value,org:($("#po-"+pick[1])||{}).value});$("#picker").click();return}
+  if(t.dataset.view){const[c,id]=t.dataset.view.split("|");openViewer(c,id);return}
+  if(t.dataset.del){const[c,id]=t.dataset.del.split("|");if(confirm("삭제할까?")){remove(c,id);if(c==="roomphotos")closeSheet()}return}
+  if(t.dataset.close!==undefined){closeSheet();return}
+  if(t.dataset.add){const r=t.dataset.add,name=$("#pn-"+r).value.trim(),org=$("#po-"+r).value.trim();
+    if(!name){flash("이름을 먼저 적어줘.");$("#pn-"+r).focus();return}
+    const pid="m"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    put("people",pid,{room:r,name,org,photo:(drafts[r]||{}).photo||"",t:Date.now()});delete drafts[r];document.activeElement&&document.activeElement.blur();schedule();flash(name+" 추가함");return}
+  if(t.id==="addq"){const v=$("#newq").value.trim();if(!v)return;const qid="c"+Date.now().toString(36);put("qa",qid,{text:v,custom:true,c:Date.now()});$("#newq").value="";return}
+});
+const timers={};
+function fieldSave(el){const[c,id,f]=el.dataset.f.split("|");if(((store[c][id]||{})[f]||"")===el.value)return;patch(c,id,{[f]:el.value})}
+document.addEventListener("input",e=>{
+  const el=e.target;
+  if(el.id==="spsearch"){spQuery=el.value;$("#splist").innerHTML=viewSpList();return}
+  if(el.dataset.f){clearTimeout(timers[el.dataset.f]);timers[el.dataset.f]=setTimeout(()=>fieldSave(el),700)}
+});
+document.addEventListener("change",e=>{
+  const el=e.target;
+  if(el.dataset.f){clearTimeout(timers[el.dataset.f]);fieldSave(el)}
+  if(el.dataset.ck){const[c,id,f]=el.dataset.ck.split("|");patch(c,id,{[f]:el.checked})}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeSheet();if(e.key==="Enter"&&e.target.id==="newq")$("#addq").click()});
+
+setInterval(()=>{$("#clock").textContent=new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",hour12:false})},5000);
+setInterval(()=>{renderHero();if(tab==="call")schedule()},30000);
+
+renderAll();
+$("#sync").textContent="불러오는 중";
+idbGet("store").then(v=>{
+  if(v)store=Object.assign(store,v);
+  $("#sync").textContent="이 폰에 자동 저장돼";renderAll();
+}).catch(()=>{$("#sync").textContent="저장소를 열지 못했어. 사파리/크롬에서 열어줘."});
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
+document.addEventListener("visibilitychange",()=>{if(document.hidden){clearTimeout(saveCache.t);idbSet("store",store).catch(()=>{})}});
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+</script>
+</body>
+</html>
