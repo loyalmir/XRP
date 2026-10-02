@@ -277,7 +277,7 @@ const QS = [
   ["q9","라운지 다과는 누가, 언제 채우나요?"],
   ["q10","내 식사 시간과 장소는?"]
 ];
-const APPV="11";
+const APPV="12";
 const COLLS=["speakers","sessions","rooms","people","roomphotos","qa"];
 
 let store={speakers:{},sessions:{},rooms:{},people:{},roomphotos:{},qa:{}};
@@ -432,7 +432,7 @@ function openSpeaker(id){
       <div><div class="nm">${esc(s[0])}</div><div class="en">${esc(s[1])}</div><div class="org">${esc(s[3])}, ${esc(s[2])}</div></div></div>
       <ul>${ss.map(x=>`<li><b>${x.s}</b>콜 ${fmt(toM(x.s)-off)}, ${esc(x.type)} ${esc(x.title)}</li>`).join("")}</ul>
       <div class="acts"><button class="tg${d.arrived?" on":""}" data-tg="speakers|${id}|arrived">${d.arrived?"라운지 도착함":"라운지 도착 체크"}</button>${d.photo?`<button class="tg" data-pick="speaker|${id}">사진 다시 찍기</button>`:""}</div>
-      ${inBase(id)?"":`<label class="f">무대 시간 (확인되면 입력)</label><input class="in-t" type="time" data-f="speakers|${id}|time" value="${esc((d.time||"").slice(0,5))}">${ss.length?"":`<p class="note" style="margin:6px 0 0">아젠다에 없는 연사야. 시간을 넣으면 콜 순서에 들어가.</p>`}`}
+      ${inBase(id)?"":`<label class="f">무대 시간 (확인되면 입력)</label><div class="row"><input class="in-t" type="time" data-f="speakers|${id}|time" value="${esc((d.time||"").slice(0,5))}">${d.time?`<button class="btn ghost" data-set="speakers|${id}|time|" style="flex:none">시간 지우기</button>`:""}</div>${ss.length?"":`<p class="note" style="margin:6px 0 0">아젠다에 없는 연사야. 시간을 넣으면 콜 순서에 들어가.</p>`}`}
       <label class="f">동행인, 연락처</label><input class="in-t" data-f="speakers|${id}|contact" value="${esc(d.contact)}" placeholder="비서, 통역, 전화번호">
       <label class="f">메모</label><textarea class="in-t" data-f="speakers|${id}|memo" placeholder="옷차림, 요청사항 등">${esc(d.memo)}</textarea>
       <div class="row" style="margin-top:14px"><button class="btn ghost" data-close style="flex:1">닫기</button>${d.custom?`<button class="btn" style="background:var(--red)" data-del="speakers|${id}">연사 삭제</button>`:""}</div>`;
