@@ -129,6 +129,7 @@ textarea.in-t{min-height:64px;resize:vertical}
 .person .av{width:42px;height:42px}
 .person .grow{flex:1;min-width:0}
 .person .sub{font-size:12.5px;color:var(--muted)}
+.tg.pin{flex:none;padding:7px 10px;font-size:12.5px;white-space:nowrap}
 .x{border:0;background:none;color:var(--muted);font-size:13px;padding:6px}
 .addp{display:grid;grid-template-columns:52px 1fr;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
 .addp .cam{width:52px;height:52px;border-radius:50%;border:1px dashed var(--line);background:var(--bg);padding:0;overflow:hidden;font-size:11.5px;color:var(--muted)}
@@ -277,7 +278,7 @@ const QS = [
   ["q9","라운지 다과는 누가, 언제 채우나요?"],
   ["q10","내 식사 시간과 장소는?"]
 ];
-const APPV="13";
+const APPV="14";
 const COLLS=["speakers","sessions","rooms","people","roomphotos","qa"];
 
 let store={speakers:{},sessions:{},rooms:{},people:{},roomphotos:{},qa:{}};
@@ -391,7 +392,7 @@ function viewSpList(){
 }
 
 function viewRooms(){
-  const tabs=`<div class="rtabs">${ROOMS.map(r=>{const c=Object.values(store.people).filter(p=>p.room===r.id).length;return `<button class="${roomSel===r.id?"on":""}" data-room="${r.id}">${r.id}<small>${r.id==="BC9"?"연사 라운지":r.id==="BC7"?"리플":"플래티넘"}${c?` ${c}명`:""}</small></button>`}).join("")}</div>`;
+  const tabs=`<div class="rtabs">${ROOMS.map(r=>{const ps=Object.values(store.people).filter(p=>p.room===r.id),c=ps.length,ci=ps.filter(p=>p.inAt).length;return `<button class="${roomSel===r.id?"on":""}" data-room="${r.id}">${r.id}<small>${r.id==="BC9"?"연사 라운지":r.id==="BC7"?"리플":"플래티넘"}${c?` ${ci}/${c}`:""}</small></button>`}).join("")}</div>`;
   return tabs+ROOMS.filter(r=>r.id===roomSel).map(r=>{
     const d=store.rooms[r.id]||{};
     const photos=Object.entries(store.roomphotos).filter(([,p])=>p.room===r.id).sort((a,b)=>(a[1].t||0)-(b[1].t||0));
@@ -405,8 +406,8 @@ function viewRooms(){
       <label class="f">출입</label><div class="seg">${["미확인","누구나","명단만"].map(o=>`<button class="${acc===o?"on":""}" data-set="rooms|${r.id}|access|${o}">${o}</button>`).join("")}</div>
       <label class="f">메모</label><textarea class="in-t" data-f="rooms|${r.id}|memo" placeholder="세팅, 다과, 특이사항">${esc(d.memo)}</textarea>
       <label class="f">방 사진</label><div class="photos">${photos.map(([pid,p])=>`<button data-view="roomphotos|${pid}"><img src="${esc(p.img)}" alt="${r.id} 사진"></button>`).join("")}<button data-pick="roomphoto|${r.id}">+ 사진</button></div>
-      <label class="f">명단 ${people.length}명</label>
-      ${people.map(([pid,p])=>`<div class="person">${p.photo?`<button class="av" style="border:0;padding:0" data-view="people|${pid}"><img src="${esc(p.photo)}" alt=""></button>`:avatar("",p.name)}<div class="grow"><b>${esc(p.name)}</b><div class="sub">${esc(p.org)}</div></div><button class="x" data-del="people|${pid}">삭제</button></div>`).join("")||`<p class="note" style="margin:4px 0 0">아직 없어. 아래에서 추가해.</p>`}
+      <label class="f">명단 ${people.length}명, 입장 ${people.filter(([,p])=>p.inAt).length}명</label>
+      ${people.map(([pid,p])=>`<div class="person">${p.photo?`<button class="av" style="border:0;padding:0" data-view="people|${pid}"><img src="${esc(p.photo)}" alt=""></button>`:avatar("",p.name)}<div class="grow"><b>${esc(p.name)}</b><div class="sub">${esc(p.org)}</div></div><button class="tg pin${p.inAt?" on":""}" data-pin="${pid}">${p.inAt?"입장 "+new Date(p.inAt).toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",hour12:false}):"입장 전"}</button><button class="x" data-del="people|${pid}">삭제</button></div>`).join("")||`<p class="note" style="margin:4px 0 0">아직 없어. 아래에서 추가해.</p>`}
       <div class="addp"><button class="cam" data-pick="draft|${r.id}">${dr.photo?`<img src="${dr.photo}" alt="">`:"사진"}</button>
         <div class="fields"><input class="in-t" id="pn-${r.id}" placeholder="이름" value="${esc(dr.name)}"><input class="in-t" id="po-${r.id}" placeholder="소속, 직함" value="${esc(dr.org)}"><div class="row"><button class="btn" data-add="${r.id}">명단에 추가</button></div></div></div>
     </section>`}).join("");
@@ -483,6 +484,7 @@ document.addEventListener("click",e=>{
   if(t.dataset.tab){tab=t.dataset.tab;saveCache();$("#view").innerHTML="";renderView();window.scrollTo(0,0);return}
   if(t.id==="hero"&&t.dataset.goto){if(tab!=="call"){tab="call";renderView()}const r=$("#row-"+t.dataset.goto);if(r)r.scrollIntoView({behavior:"smooth",block:"start"});return}
   if(t.dataset.room){roomSel=t.dataset.room;try{localStorage.setItem(LS+"-room",roomSel)}catch(_){}renderView();window.scrollTo(0,0);return}
+  if(t.dataset.pin){const p=store.people[t.dataset.pin]||{};if(p.inAt&&!confirm(p.name+" 입장 체크를 취소할까?"))return;patch("people",t.dataset.pin,{inAt:p.inAt?0:Date.now()});return}
   if(t.dataset.gotoadd!==undefined){$("#addsp").scrollIntoView({block:"start"});$("#nsp-name").focus();return}
   if(t.dataset.addsp!==undefined){const ko=$("#nsp-name").value.trim();if(!ko){flash("이름을 먼저 적어줘.");$("#nsp-name").focus();return}
     const cid="c"+Date.now().toString(36);put("speakers",cid,{custom:true,ko,org:$("#nsp-org").value.trim(),title:$("#nsp-title").value.trim(),time:$("#nsp-time").value,t:Date.now()});
