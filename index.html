@@ -153,7 +153,9 @@ textarea.in-t{min-height:64px;resize:vertical}
 .sh{transition:transform .2s ease-out}
 .sh.drag{transition:none}
 .grab{width:42px;height:5px;border-radius:3px;background:var(--line);margin:-4px auto 12px}
-.sh .big{width:100%;aspect-ratio:4/5;max-height:46vh;border-radius:12px;background:var(--chip);display:grid;place-items:center;overflow:hidden;border:0;padding:0;color:var(--muted);font-size:15px}
+.sh .top{display:flex;gap:14px;align-items:center}
+.sh .top .nm{margin-top:0}
+.sh .big{width:96px;height:96px;flex:none;border-radius:14px;font-size:12.5px;line-height:1.3;background:var(--chip);display:grid;place-items:center;overflow:hidden;border:0;padding:0;color:var(--muted);font-size:15px}
 .sh .big img{width:100%;height:100%;object-fit:cover}
 .sh .nm{font-size:21px;font-weight:700;margin-top:12px}
 .sh .en{color:var(--muted);font-size:14px}
@@ -250,10 +252,10 @@ const SESS = [
   ["s20","18:10","18:35","패널","스테이블코인, 일상 금융 속으로",["lacey-wisdom","leo-lee","john-lilic","fig"]]
 ].map(a=>({id:a[0],s:a[1],e:a[2],type:a[3],title:a[4],sp:a[5]}));
 const ROOMS = [
-  {id:"BC9",use:"연사 라운지 (Speaker Zone)",note:"연사는 '연사' 탭에서 관리해. 여기엔 연사 외 VIP나 동행인을 적어."},
-  {id:"BC7",use:"리플 스폰서 룸"},
   {id:"BC6",use:"플래티넘 스폰서 룸"},
-  {id:"BC8",use:"플래티넘 스폰서 룸"}
+  {id:"BC7",use:"리플 스폰서 룸"},
+  {id:"BC8",use:"플래티넘 스폰서 룸"},
+  {id:"BC9",use:"연사 라운지 (Speaker Zone)",note:"연사는 '연사' 탭에서 관리해. 여기엔 연사 외 VIP나 동행인을 적어."}
 ];
 const QS = [
   ["q1","연사 콜은 세션 몇 분 전에 하나요?"],
@@ -267,6 +269,7 @@ const QS = [
   ["q9","라운지 다과는 누가, 언제 채우나요?"],
   ["q10","내 식사 시간과 장소는?"]
 ];
+const APPV="8";
 const COLLS=["speakers","sessions","rooms","people","roomphotos","qa"];
 
 let store={speakers:{},sessions:{},rooms:{},people:{},roomphotos:{},qa:{}};
@@ -396,14 +399,14 @@ function viewQA(){
   <label class="f">콜 시간 (세션 시작 몇 분 전)</label><div class="seg">${[10,15,20,25,30].map(o=>`<button class="${offset()===o?"on":""}" data-set="qa|settings|callOffset|${o}">${o}분</button>`).join("")}</div></section>
   <p class="note">${okN}/${all.length}개 확인함. 답을 적고 체크해.</p>
   ${all.map(([id,text])=>{const d=store.qa[id]||{};return `<div class="q${d.ok?" ok":""}"><label class="qt"><input type="checkbox" data-ck="qa|${id}|ok"${d.ok?" checked":""}><span>${esc(text)}</span></label><textarea class="in-t" data-f="qa|${id}|a" placeholder="답 적기">${esc(d.a)}</textarea>${d.custom?`<button class="x" data-del="qa|${id}">질문 삭제</button>`:""}</div>`}).join("")}
-  <div class="row" style="margin-top:6px"><input class="in-t" id="newq" placeholder="질문 추가"><button class="btn" id="addq">추가</button></div>`;
+  <div class="row" style="margin-top:6px"><input class="in-t" id="newq" placeholder="질문 추가"><button class="btn" id="addq">추가</button></div><p class="note" style="margin-top:16px;text-align:center">앱 버전 ${APPV}</p>`;
 }
 
 function openSpeaker(id){
   sheetFn=()=>{
     const s=SP[id],d=spd(id),ss=SESS.filter(x=>x.sp.includes(id)),off=offset();
-    $("#sh").innerHTML=`<div class="grab"></div><button class="big" data-pick="speaker|${id}">${d.photo?`<img src="${esc(d.photo)}" alt="${esc(s[0])}">`:"눌러서 사진 찍기"}</button>
-      <div class="nm">${esc(s[0])}</div><div class="en">${esc(s[1])}</div><div class="org">${esc(s[3])}, ${esc(s[2])}</div>
+    $("#sh").innerHTML=`<div class="grab"></div><div class="top"><button class="big" data-pick="speaker|${id}">${d.photo?`<img src="${esc(d.photo)}" alt="${esc(s[0])}">`:"사진<br>찍기"}</button>
+      <div><div class="nm">${esc(s[0])}</div><div class="en">${esc(s[1])}</div><div class="org">${esc(s[3])}, ${esc(s[2])}</div></div></div>
       <ul>${ss.map(x=>`<li><b>${x.s}</b>콜 ${fmt(toM(x.s)-off)}, ${esc(x.type)} ${esc(x.title)}</li>`).join("")}</ul>
       <div class="acts"><button class="tg${d.arrived?" on":""}" data-tg="speakers|${id}|arrived">${d.arrived?"라운지 도착함":"라운지 도착 체크"}</button>${d.photo?`<button class="tg" data-pick="speaker|${id}">사진 다시 찍기</button>`:""}</div>
       <label class="f">동행인, 연락처</label><input class="in-t" data-f="speakers|${id}|contact" value="${esc(d.contact)}" placeholder="비서, 통역, 전화번호">
@@ -494,7 +497,7 @@ idbGet("store").then(v=>{
 }).catch(()=>{syncText="저장소를 열지 못했어. 사파리나 크롬에서 열어줘.";renderAll()});
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
 document.addEventListener("visibilitychange",()=>{if(document.hidden){clearTimeout(saveCache.t);idbSet("store",store).catch(()=>{})}});
-if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>r.update()).catch(()=>{}));
 </script>
 </body>
 </html>
