@@ -149,6 +149,9 @@ textarea.in-t{min-height:64px;resize:vertical}
 #sheet{position:fixed;inset:0;z-index:40;overscroll-behavior:contain;background:rgba(5,12,22,.55);display:none;align-items:flex-end;justify-content:center}
 #sheet.open{display:flex}
 .sh{overscroll-behavior:contain;-webkit-overflow-scrolling:touch;background:var(--card);width:100%;max-width:720px;max-height:92%;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom,0px))}
+.sh{transition:transform .2s ease-out}
+.sh.drag{transition:none}
+.grab{width:42px;height:5px;border-radius:3px;background:var(--line);margin:-4px auto 12px}
 .sh .big{width:100%;aspect-ratio:4/5;max-height:46vh;border-radius:12px;background:var(--chip);display:grid;place-items:center;overflow:hidden;border:0;padding:0;color:var(--muted);font-size:15px}
 .sh .big img{width:100%;height:100%;object-fit:cover}
 .sh .nm{font-size:21px;font-weight:700;margin-top:12px}
@@ -398,7 +401,7 @@ function viewQA(){
 function openSpeaker(id){
   sheetFn=()=>{
     const s=SP[id],d=spd(id),ss=SESS.filter(x=>x.sp.includes(id)),off=offset();
-    $("#sh").innerHTML=`<button class="big" data-pick="speaker|${id}">${d.photo?`<img src="${esc(d.photo)}" alt="${esc(s[0])}">`:"눌러서 사진 찍기"}</button>
+    $("#sh").innerHTML=`<div class="grab"></div><button class="big" data-pick="speaker|${id}">${d.photo?`<img src="${esc(d.photo)}" alt="${esc(s[0])}">`:"눌러서 사진 찍기"}</button>
       <div class="nm">${esc(s[0])}</div><div class="en">${esc(s[1])}</div><div class="org">${esc(s[3])}, ${esc(s[2])}</div>
       <ul>${ss.map(x=>`<li><b>${x.s}</b>콜 ${fmt(toM(x.s)-off)}, ${esc(x.type)} ${esc(x.title)}</li>`).join("")}</ul>
       <div class="acts"><button class="tg${d.arrived?" on":""}" data-tg="speakers|${id}|arrived">${d.arrived?"라운지 도착함":"라운지 도착 체크"}</button>${d.photo?`<button class="tg" data-pick="speaker|${id}">사진 다시 찍기</button>`:""}</div>
@@ -411,13 +414,19 @@ function openSpeaker(id){
 function openViewer(coll,id){
   const p=store[coll][id];if(!p)return;
   sheetFn=null;
-  $("#sh").innerHTML=`<div class="viewer"><img src="${esc(p.img||p.photo)}" alt=""></div>${p.name?`<div class="nm">${esc(p.name)}</div><div class="org">${esc(p.org)}</div>`:""}<div class="row" style="margin-top:12px"><button class="btn ghost" data-close style="flex:1">닫기</button>${coll==="roomphotos"?`<button class="btn" style="background:var(--red)" data-del="roomphotos|${id}">사진 삭제</button>`:""}</div>`;
+  $("#sh").innerHTML=`<div class="grab"></div><div class="viewer"><img src="${esc(p.img||p.photo)}" alt=""></div>${p.name?`<div class="nm">${esc(p.name)}</div><div class="org">${esc(p.org)}</div>`:""}<div class="row" style="margin-top:12px"><button class="btn ghost" data-close style="flex:1">닫기</button>${coll==="roomphotos"?`<button class="btn" style="background:var(--red)" data-del="roomphotos|${id}">사진 삭제</button>`:""}</div>`;
   lockScroll();$("#sheet").classList.add("open");
 }
 let lockY=0;
 function lockScroll(){const b=document.body;if(b.style.position==="fixed")return;lockY=window.scrollY;b.style.position="fixed";b.style.top=(-lockY)+"px";b.style.left="0";b.style.right="0"}
 function unlockScroll(){const b=document.body;if(b.style.position!=="fixed")return;b.style.position="";b.style.top="";b.style.left="";b.style.right="";window.scrollTo(0,lockY)}
-function closeSheet(){sheetFn=null;$("#sheet").classList.remove("open");unlockScroll()}
+function closeSheet(){sheetFn=null;$("#sheet").classList.remove("open");$("#sh").style.transform="";unlockScroll()}
+(()=>{const sh=$("#sh");let sy=null,dy=0,t0=0;
+  sh.addEventListener("touchstart",e=>{const tg=e.target.tagName;if(sh.scrollTop>0||tg==="INPUT"||tg==="TEXTAREA"){sy=null;return}sy=e.touches[0].clientY;dy=0;t0=Date.now()},{passive:true});
+  sh.addEventListener("touchmove",e=>{if(sy===null)return;dy=e.touches[0].clientY-sy;if(dy<=0){sh.classList.remove("drag");sh.style.transform="";return}e.preventDefault();sh.classList.add("drag");sh.style.transform="translateY("+dy+"px)"},{passive:false});
+  sh.addEventListener("touchend",()=>{if(sy===null)return;sh.classList.remove("drag");const v=dy/Math.max(1,Date.now()-t0);
+    if(dy>110||(dy>40&&v>.5)){sh.style.transform="translateY(100%)";setTimeout(closeSheet,180)}else sh.style.transform="";sy=null;dy=0});
+})();
 
 function shrink(file,max=560,q=.72){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),img=new Image();
   img.onload=()=>{const s=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight)),c=document.createElement("canvas");c.width=Math.round(img.naturalWidth*s);c.height=Math.round(img.naturalHeight*s);c.getContext("2d").drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",q))};
