@@ -269,11 +269,11 @@ const QS = [
   ["q9","라운지 다과는 누가, 언제 채우나요?"],
   ["q10","내 식사 시간과 장소는?"]
 ];
-const APPV="8";
+const APPV="9";
 const COLLS=["speakers","sessions","rooms","people","roomphotos","qa"];
 
 let store={speakers:{},sessions:{},rooms:{},people:{},roomphotos:{},qa:{}};
-let syncText="불러오는 중",roomSel="BC9",tab="call", spQuery="", sheetFn=null, pendingRender=false, pick=null;
+let showPast=false,syncText="불러오는 중",roomSel="BC9",tab="call", spQuery="", sheetFn=null, pendingRender=false, pick=null;
 const drafts={};
 const LS="bc-lounge-v1";
 try{const t=localStorage.getItem(LS+"-tab");if(t)tab=t;const r=localStorage.getItem(LS+"-room");if(r)roomSel=r}catch(e){}
@@ -345,7 +345,10 @@ function renderView(){
 function viewCall(){
   const n=nowM(),off=offset();
   const live=SESS.find(s=>n>=toM(s.s)&&n<toM(s.e)),done=SESS.filter(isCalled).length;
-  return `<h2>세션별 콜 순서</h2><p class="note">이름을 누를 때마다 콜, 인계, 대기 순서로 바뀌어. 얼굴을 누르면 연사 정보가 열려. 콜은 세션 시작 ${off}분 전 기준이야.</p><p class="status">콜 완료 ${done}/${SESS.length}${live?`, 지금 무대: ${esc(live.type)} ${esc(live.title)}`:""}<br>${esc(syncText)}</p>`+SESS.map(s=>{
+  const isDone=x=>n>=toM(x.e)||x.sp.every(id=>cst(x.id,id)>=2);
+  const doneN=SESS.filter(isDone).length;
+  const pastBtn=doneN?`<button class="tg" data-past style="width:100%;margin-bottom:8px">${showPast?`지난 세션 ${doneN}개 접기`:`지난 세션 ${doneN}개 펼치기`}</button>`:"";
+  return `<h2>세션별 콜 순서</h2><p class="note">이름을 누를 때마다 콜, 인계, 대기 순서로 바뀌어. 얼굴을 누르면 연사 정보가 열려. 콜은 세션 시작 ${off}분 전 기준이야.</p><p class="status">콜 완료 ${done}/${SESS.length}${live?`, 지금 무대: ${esc(live.type)} ${esc(live.title)}`:""}<br>${esc(syncText)}</p>`+pastBtn+SESS.filter(x=>showPast||!isDone(x)).map(s=>{
     const st=sst(s.id),call=toM(s.s)-off,start=toM(s.s),end=toM(s.e);
     let cls="sess";
     if(n>=end)cls+=" past";else if(n>=start)cls+=" onstage";else if(n>=call&&!isCalled(s))cls+=" callnow";
@@ -459,6 +462,7 @@ document.addEventListener("click",e=>{
   if(t.dataset.tab){tab=t.dataset.tab;saveCache();$("#view").innerHTML="";renderView();window.scrollTo(0,0);return}
   if(t.id==="hero"&&t.dataset.goto){if(tab!=="call"){tab="call";renderView()}const r=$("#row-"+t.dataset.goto);if(r)r.scrollIntoView({behavior:"smooth",block:"start"});return}
   if(t.dataset.room){roomSel=t.dataset.room;try{localStorage.setItem(LS+"-room",roomSel)}catch(_){}renderView();window.scrollTo(0,0);return}
+  if(t.dataset.past!==undefined){showPast=!showPast;renderView();return}
   if(t.dataset.cyc){const[sid,spid]=t.dataset.cyc.split("|");const m=Object.assign({},sst(sid).sp||{});m[spid]=((m[spid]||0)+1)%3;patch("sessions",sid,{sp:m});return}
   if(t.dataset.sp){openSpeaker(t.dataset.sp);return}
   if(t.dataset.tg){const[c,id,f]=t.dataset.tg.split("|");patch(c,id,{[f]:!(store[c][id]||{})[f]});return}
