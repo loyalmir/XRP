@@ -277,7 +277,7 @@ const QS = [
   ["q9","라운지 다과는 누가, 언제 채우나요?"],
   ["q10","내 식사 시간과 장소는?"]
 ];
-const APPV="12";
+const APPV="13";
 const COLLS=["speakers","sessions","rooms","people","roomphotos","qa"];
 
 let store={speakers:{},sessions:{},rooms:{},people:{},roomphotos:{},qa:{}};
@@ -354,8 +354,8 @@ function renderView(){
   document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===tab));
   const v=$("#view");
   if(tab==="call")v.innerHTML=viewCall();
-  else if(tab==="sp"){if(!$("#spsearch")){v.innerHTML=`<h2 id="sph"></h2><p class="note">이름을 누르면 사진을 찍고 메모할 수 있어.</p><input id="spsearch" class="search" type="search" placeholder="이름이나 소속 검색" value="${esc(spQuery)}"><div id="splist"></div>
-    <section class="card" style="margin-top:14px"><h3>연사 추가</h3><div class="use">큐시트에만 있는 연사, 사회자, 대체 연사를 넣어.</div>
+  else if(tab==="sp"){if(!$("#spsearch")){v.innerHTML=`<h2 id="sph"></h2><p class="note">이름을 누르면 사진을 찍고 메모할 수 있어.</p><button class="btn" data-gotoadd style="width:100%;margin-bottom:10px">+ 연사 추가</button><input id="spsearch" class="search" type="search" placeholder="이름이나 소속 검색" value="${esc(spQuery)}"><div id="splist"></div>
+    <section class="card" id="addsp" style="margin-top:14px"><h3>연사 추가</h3><div class="use">큐시트에만 있는 연사, 사회자, 대체 연사를 넣어.</div>
     <div class="fields" style="display:grid;gap:6px"><input class="in-t" id="nsp-name" placeholder="이름"><input class="in-t" id="nsp-org" placeholder="소속"><input class="in-t" id="nsp-title" placeholder="직함 (예: 사회자)"><label class="f" style="margin:4px 0 0">무대 시간 (모르면 비워둬)</label><input class="in-t" id="nsp-time" type="time"><div class="row"><button class="btn" data-addsp>연사 추가</button></div></div></section>`}
     $("#sph").textContent="연사 "+Object.keys(SP).length+"명";$("#splist").innerHTML=viewSpList()}
   else if(tab==="room")v.innerHTML=viewRooms();
@@ -483,6 +483,7 @@ document.addEventListener("click",e=>{
   if(t.dataset.tab){tab=t.dataset.tab;saveCache();$("#view").innerHTML="";renderView();window.scrollTo(0,0);return}
   if(t.id==="hero"&&t.dataset.goto){if(tab!=="call"){tab="call";renderView()}const r=$("#row-"+t.dataset.goto);if(r)r.scrollIntoView({behavior:"smooth",block:"start"});return}
   if(t.dataset.room){roomSel=t.dataset.room;try{localStorage.setItem(LS+"-room",roomSel)}catch(_){}renderView();window.scrollTo(0,0);return}
+  if(t.dataset.gotoadd!==undefined){$("#addsp").scrollIntoView({block:"start"});$("#nsp-name").focus();return}
   if(t.dataset.addsp!==undefined){const ko=$("#nsp-name").value.trim();if(!ko){flash("이름을 먼저 적어줘.");$("#nsp-name").focus();return}
     const cid="c"+Date.now().toString(36);put("speakers",cid,{custom:true,ko,org:$("#nsp-org").value.trim(),title:$("#nsp-title").value.trim(),time:$("#nsp-time").value,t:Date.now()});
     ["#nsp-name","#nsp-org","#nsp-title","#nsp-time"].forEach(x=>$(x).value="");document.activeElement&&document.activeElement.blur();flash(ko+" 추가함");return}
