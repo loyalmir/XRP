@@ -283,7 +283,7 @@ const QS = [
   ["q9","라운지 다과는 누가, 언제 채우나요?"],
   ["q10","내 식사 시간과 장소는?"]
 ];
-const APPV="18";
+const APPV="19";
 const COLLS=["speakers","sessions","rooms","people","roomphotos","qa"];
 
 let store={speakers:{},sessions:{},rooms:{},people:{},roomphotos:{},qa:{}};
@@ -503,10 +503,10 @@ document.addEventListener("click",e=>{
     ["#nsp-name","#nsp-org","#nsp-title","#nsp-time"].forEach(x=>$(x).value="");document.activeElement&&document.activeElement.blur();flash(ko+" 추가함");return}
   if(t.dataset.reload!==undefined){hardReload();return}
   if(t.dataset.past!==undefined){showPast=!showPast;renderView();return}
-  if(t.dataset.arr){const id=t.dataset.arr;patch("speakers",id,{arrived:!spd(id).arrived});return}
+  if(t.dataset.arr){const id=t.dataset.arr;if(spd(id).arrived&&!confirm(SP[id][0]+" 도착 체크를 해제할까?"))return;patch("speakers",id,{arrived:!spd(id).arrived});return}
   if(t.dataset.cyc){const[sid,spid]=t.dataset.cyc.split("|");const m=Object.assign({},sst(sid).sp||{});m[spid]=((m[spid]||0)+1)%3;patch("sessions",sid,{sp:m});return}
   if(t.dataset.sp){openSpeaker(t.dataset.sp);return}
-  if(t.dataset.tg){const[c,id,f]=t.dataset.tg.split("|");patch(c,id,{[f]:!(store[c][id]||{})[f]});return}
+  if(t.dataset.tg){const[c,id,f]=t.dataset.tg.split("|");if(c==="speakers"&&f==="arrived"&&(store[c][id]||{})[f]&&!confirm(SP[id][0]+" 도착 체크를 해제할까?"))return;patch(c,id,{[f]:!(store[c][id]||{})[f]});return}
   if(t.dataset.set){const[c,id,f,v]=t.dataset.set.split("|");patch(c,id,{[f]:f==="callOffset"?Number(v):v});return}
   if(t.dataset.pick){pick=t.dataset.pick.split("|");if(pick[0]==="draft")drafts[pick[1]]=Object.assign(drafts[pick[1]]||{},{name:($("#pn-"+pick[1])||{}).value,org:($("#po-"+pick[1])||{}).value});$("#picker").click();return}
   if(t.dataset.view){const[c,id]=t.dataset.view.split("|");openViewer(c,id);return}
