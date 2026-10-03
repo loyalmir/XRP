@@ -92,6 +92,9 @@ h2{font-size:18px;margin:6px 2px 10px}
 .spc.c1 .lbl{background:rgba(0,0,0,.12)}
 .spc.c2{border-color:var(--green);background:var(--green);color:#fff}
 .spc.c2 .lbl{background:rgba(255,255,255,.2)}
+.spc .arb{border:0;border-left:1px solid var(--line);background:none;padding:7px 12px;font-size:12.5px;font-weight:700;color:var(--red);align-self:stretch}
+.spc .arb.on{color:#fff;background:var(--green)}
+body::before{content:"";position:fixed;left:0;right:0;top:0;height:env(safe-area-inset-top,0px);background:var(--navy);z-index:30}
 .prog{font-size:12.5px;color:var(--muted);margin-top:8px}
 .av{width:26px;height:26px;border-radius:50%;background:var(--chip);display:grid;place-items:center;font-size:12px;font-weight:600;overflow:hidden;flex:none}
 .av img{width:100%;height:100%;object-fit:cover}
@@ -280,7 +283,7 @@ const QS = [
   ["q9","라운지 다과는 누가, 언제 채우나요?"],
   ["q10","내 식사 시간과 장소는?"]
 ];
-const APPV="17";
+const APPV="18";
 const COLLS=["speakers","sessions","rooms","people","roomphotos","qa"];
 
 let store={speakers:{},sessions:{},rooms:{},people:{},roomphotos:{},qa:{}};
@@ -382,7 +385,7 @@ function viewCall(){
     const missing=s.sp.filter(id=>!spd(id).arrived).length;
     return `<div class="${cls}" id="row-${s.id}"><div class="tm"><b>${s.s}</b><span>~${s.e}</span><em>콜 ${fmt(call)}</em>${s.o&&s.o!==s.s?`<span style="color:var(--amber);font-weight:600">변경됨</span>`:""}</div><div>
       <div class="stype">${esc(s.type)}</div><div class="stitle">${esc(s.title)}</div>
-      <div class="sps">${s.sp.map(id=>{const c=cst(s.id,id);return `<span class="spc${spd(id).arrived?" in":""}${c?" c"+c:""}"><button class="avb" data-sp="${id}" aria-label="${esc(SP[id][0])} 정보">${avatar(spd(id).photo,SP[id][0])}</button><button class="nmb" data-cyc="${s.id}|${id}">${esc(SP[id][0])}${c?`<span class="lbl">${c===1?"콜":"인계"}</span>`:`<span class="dot"></span>`}</button></span>`}).join("")}</div>
+      <div class="sps">${s.sp.map(id=>{const c=cst(s.id,id);return `<span class="spc${spd(id).arrived?" in":""}${c?" c"+c:""}"><button class="avb" data-sp="${id}" aria-label="${esc(SP[id][0])} 정보">${avatar(spd(id).photo,SP[id][0])}</button><button class="nmb" data-cyc="${s.id}|${id}">${esc(SP[id][0])}${c?`<span class="lbl">${c===1?"콜":"인계"}</span>`:""}</button><button class="arb${spd(id).arrived?" on":""}" data-arr="${id}">${spd(id).arrived?"도착":"미도착"}</button></span>`}).join("")}</div>
       ${missing&&n<start?`<div class="miss">라운지 미도착 ${missing}명</div>`:""}
       <div class="prog">콜 ${s.sp.filter(id=>cst(s.id,id)>=1).length}/${s.sp.length}, 인계 ${s.sp.filter(id=>cst(s.id,id)>=2).length}/${s.sp.length}</div>
     </div></div>`}).join("")+(untimed().length?`<section class="card" style="margin-top:14px"><h3>시간 미정 연사 ${untimed().length}명</h3><div class="use">아젠다에 없는 연사야. 이름을 눌러 무대 시간을 넣으면 콜 순서에 들어가.</div><div class="sps">${untimed().map(id=>`<span class="spc${spd(id).arrived?" in":""}"><button class="avb" data-sp="${id}">${avatar(spd(id).photo,SP[id][0])}</button><button class="nmb" data-sp="${id}">${esc(SP[id][0])}<span class="dot"></span></button></span>`).join("")}</div></section>`:"");
@@ -500,6 +503,7 @@ document.addEventListener("click",e=>{
     ["#nsp-name","#nsp-org","#nsp-title","#nsp-time"].forEach(x=>$(x).value="");document.activeElement&&document.activeElement.blur();flash(ko+" 추가함");return}
   if(t.dataset.reload!==undefined){hardReload();return}
   if(t.dataset.past!==undefined){showPast=!showPast;renderView();return}
+  if(t.dataset.arr){const id=t.dataset.arr;patch("speakers",id,{arrived:!spd(id).arrived});return}
   if(t.dataset.cyc){const[sid,spid]=t.dataset.cyc.split("|");const m=Object.assign({},sst(sid).sp||{});m[spid]=((m[spid]||0)+1)%3;patch("sessions",sid,{sp:m});return}
   if(t.dataset.sp){openSpeaker(t.dataset.sp);return}
   if(t.dataset.tg){const[c,id,f]=t.dataset.tg.split("|");patch(c,id,{[f]:!(store[c][id]||{})[f]});return}
