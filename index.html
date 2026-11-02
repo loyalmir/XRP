@@ -196,6 +196,7 @@ body.typing main{padding-bottom:40vh}
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script>
 // ▼▼▼ 파이어베이스 설정: 콘솔에서 복사한 firebaseConfig 내용을 여기에 붙여넣기 ▼▼▼
 const FB_CONFIG = {
@@ -591,7 +592,7 @@ idbGet("store").then(async v=>{
   if(FB_CONFIG.projectId&&window.firebase){
     try{
       if(v&&!(await idbGet("local-backup").catch(()=>null)))await idbSet("local-backup",v).catch(()=>{});
-      firebase.initializeApp(FB_CONFIG);fs=firebase.firestore();
+      firebase.initializeApp(FB_CONFIG);try{await firebase.auth().signInAnonymously()}catch(e){console.warn("익명 로그인 실패",e)}fs=firebase.firestore();
       await fs.enablePersistence({synchronizeTabs:true}).catch(()=>{});
       syncText="공유 서버 연결됨. 모두에게 실시간으로 보여.";
       COLLS.forEach(c=>ref(c).onSnapshot(snap=>{const m={};snap.forEach(d=>{m[d.id]=d.data()});store[c]=m;saveCache();schedule()},
